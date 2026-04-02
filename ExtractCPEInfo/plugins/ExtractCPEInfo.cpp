@@ -43,7 +43,7 @@
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
 
-#include "PhysicsTools/TensorFlow/interface/TensorFlow.h"
+//#include "PhysicsTools/TensorFlow/interface/TensorFlow.h"
 
 #include "DataFormats/TrackerRecHit2D/interface/SiPixelRecHit.h"
 #include "DataFormats/TrackReco/interface/Track.h"
@@ -167,6 +167,13 @@ void ExtractCPEInfo::globalEndJob(const CacheData* cacheData) {
 void ExtractCPEInfo::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
 	// defining this function will lead to a *_cfi file being generated when compiling
 	edm::ParameterSetDescription desc;
+    desc.add<std::string>("fname");
+	desc.add<bool>("associateRecoTracks");
+	desc.add<std::string>("pixelSimLinkSrc");
+	desc.add<std::string>("stripSimLinkSrc");
+	desc.add<std::vector<std::string>>("ROUList");
+	desc.add<bool>("associatePixel");
+	desc.add<bool>("associateStrip");
 	descriptions.addWithDefaultLabel(desc);
 }
 
