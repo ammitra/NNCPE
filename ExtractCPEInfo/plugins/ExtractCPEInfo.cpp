@@ -136,6 +136,9 @@ private:
     float CotBeta;
     float CotAlpha_detAngle;
     float CotBeta_detAngle;
+    int Cluster_size;
+    int Cluster_sizeX;
+    int Cluster_sizeY;
     float Cluster_raw[TXSIZE][TYSIZE];
     float Cluster_xRaw[TXSIZE];
     float Cluster_yRaw[TYSIZE];
@@ -203,6 +206,9 @@ void ExtractCPEInfo::ResetVars(){
     CotBeta = 0.f;
     CotAlpha_detAngle = 0.f;
     CotBeta_detAngle = 0.f;
+    Cluster_size = 0;
+    Cluster_sizeX = 0;
+    Cluster_sizeY = 0;
     nSimHit = 0;
     Generic_x = 0.f;
     Generic_y = 0.f;
@@ -255,6 +261,9 @@ trackerHitAssociatorConfig_(config, consumesCollector()) {
 
     out_Tree->Branch("CotAlpha_detAngle", &CotAlpha_detAngle, "CotAlpha_detAngle/F");
     out_Tree->Branch("CotBeta_detAngle", &CotBeta_detAngle, "CotBeta_detAngle/F");
+    out_Tree->Branch("Cluster_size", &Cluster_size, "Cluster_size/I");
+    out_Tree->Branch("Cluster_sizeX", &Cluster_sizeX, "Cluster_sizeX/I");
+    out_Tree->Branch("Cluster_sizeY", &Cluster_sizeY, "Cluster_sizeY/I");
     // ROOT does not support variable length 2D arrays so this is hardcoded instead of using TXSIZE (13) and TYSIZE (21) -- is there a better way?
     out_Tree->Branch("Cluster", &Cluster, "Cluster[13][21]/F");
     out_Tree->Branch("Cluster_x", &Cluster_x, "Cluster_x[13]/F");
@@ -460,6 +469,9 @@ void ExtractCPEInfo::analyze(const edm::Event& event, const edm::EventSetup& set
             }
             n_double_x=0; n_double_y=0;
             int clustersize_x = cluster.sizeX(), clustersize_y = cluster.sizeY();
+            Cluster_size = cluster.size();
+            Cluster_sizeX = clustersize_x;
+            Cluster_sizeY = clustersize_y;
             int mid_x = round(float(irow_sum)/float(clustersize));
             int mid_y = round(float(icol_sum)/float(clustersize));
             int offset_x = 6 - mid_x;
