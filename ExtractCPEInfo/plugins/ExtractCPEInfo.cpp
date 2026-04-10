@@ -418,19 +418,6 @@ void ExtractCPEInfo::analyze(const edm::Event& event, const edm::EventSetup& set
             if(!geomdetunit) continue;
             auto const& topol = geomdetunit->specificTopology();
 
-            // --- Centering information on the cluster ---
-            //--- Upper Right corner of Lower Left pixel -- in measurement frame
-            MeasurementPoint meas_URcorn_LLpix(cluster.minPixelRow() + 1.0, cluster.minPixelCol() + 1.0);
-            //--- Lower Left corner of Upper Right pixel -- in measurement frame
-            MeasurementPoint meas_LLcorn_URpix(cluster.maxPixelRow(), cluster.maxPixelCol());
-            //--- These two now converted into the local
-            LocalPoint local_URcorn_LLpix;
-            LocalPoint local_LLcorn_URpix;
-            local_URcorn_LLpix = topol.localPosition(meas_URcorn_LLpix);
-            local_LLcorn_URpix = topol.localPosition(meas_LLcorn_URpix);
-            ClusterCenter_x = 0.5f * (local_URcorn_LLpix.x() + local_LLcorn_URpix.x());
-            ClusterCenter_y = 0.5f * (local_URcorn_LLpix.y() + local_LLcorn_URpix.y());
-
             auto const& theOrigin = geomdetunit->surface().toLocal(GlobalPoint(0, 0, 0));
             LocalPoint lp2 = topol.localPosition(MeasurementPoint(cluster.x(), cluster.y()));
             auto gvx = lp2.x() - theOrigin.x();
@@ -504,6 +491,12 @@ void ExtractCPEInfo::analyze(const edm::Event& event, const edm::EventSetup& set
             int mid_y = round(float(icol_sum)/float(clustersize));
             int offset_x = 6 - mid_x;
             int offset_y = 10 - mid_y;
+
+            MeasurementPoint meas_center_matrix(row_offset + mid_x + 0.5f, col_offset + mid_y + 0.5f);
+            LocalPoint local_center_matrix = topol.localPosition(meas_center_matrix);
+            ClusterCenter_x = local_center_matrix.x();
+            ClusterCenter_y = local_center_matrix.y();
+
             for (int i = 0; i < cluster.size(); ++i) {
                 auto pix = cluster.pixel(i);
                 int irow = int(pix.x) - row_offset + offset_x;
