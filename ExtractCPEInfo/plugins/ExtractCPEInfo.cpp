@@ -136,6 +136,10 @@ private:
     float CotBeta;
     float CotAlpha_detAngle;
     float CotBeta_detAngle;
+    float ClusterCenter_x;
+    float ClusterCenter_y;
+    int Row_offset;
+    int Col_offset;
     int Cluster_size;
     int Cluster_sizeX;
     int Cluster_sizeY;
@@ -209,6 +213,10 @@ void ExtractCPEInfo::ResetVars(){
     Cluster_size = 0;
     Cluster_sizeX = 0;
     Cluster_sizeY = 0;
+    Row_offset = -1;
+    Col_offset = -1;
+    ClusterCenter_x = 0.f;
+    ClusterCenter_y = 0.f;
     nSimHit = 0;
     Generic_x = 0.f;
     Generic_y = 0.f;
@@ -258,6 +266,11 @@ trackerHitAssociatorConfig_(config, consumesCollector()) {
     out_Tree->Branch("Panel", &Panel, "Panel/I");
     out_Tree->Branch("CotAlpha",&CotAlpha, "CotAlpha/F");
     out_Tree->Branch("CotBeta",&CotBeta, "CotBeta/F");
+    out_Tree->Branch("Row_offset", &Row_offset, "Row_offset/I");
+    out_Tree->Branch("Col_offset", &Col_offset, "Col_offset/I");
+    out_Tree->Branch("ClusterCenter_x", &ClusterCenter_x, "ClusterCenter_x/F");
+    out_Tree->Branch("ClusterCenter_y", &ClusterCenter_y, "ClusterCenter_y/F");
+
 
     out_Tree->Branch("CotAlpha_detAngle", &CotAlpha_detAngle, "CotAlpha_detAngle/F");
     out_Tree->Branch("CotBeta_detAngle", &CotBeta_detAngle, "CotBeta_detAngle/F");
@@ -387,8 +400,10 @@ void ExtractCPEInfo::analyze(const edm::Event& event, const edm::EventSetup& set
             if (clustp.isNull())
                 continue;
             auto const& cluster = *clustp;
-            int row_offset = cluster.minPixelRow();
-            int col_offset = cluster.minPixelCol();
+            Row_offset = cluster.minPixelRow();
+            Col_offset = cluster.minPixelCol();
+            int row_offset = Row_offset;
+            int col_offset = Col_offset;
             // CALCULATING ANGLE
             auto const& ltp = trajParams[h];
 
@@ -476,6 +491,12 @@ void ExtractCPEInfo::analyze(const edm::Event& event, const edm::EventSetup& set
             int mid_y = round(float(icol_sum)/float(clustersize));
             int offset_x = 6 - mid_x;
             int offset_y = 10 - mid_y;
+
+            MeasurementPoint meas_center_matrix(row_offset + mid_x + 0.5f, col_offset + mid_y + 0.5f);
+            LocalPoint local_center_matrix = topol.localPosition(meas_center_matrix);
+            ClusterCenter_x = local_center_matrix.x();
+            ClusterCenter_y = local_center_matrix.y();
+
             for (int i = 0; i < cluster.size(); ++i) {
                 auto pix = cluster.pixel(i);
                 int irow = int(pix.x) - row_offset + offset_x;
@@ -505,7 +526,7 @@ void ExtractCPEInfo::analyze(const edm::Event& event, const edm::EventSetup& set
             if(n_double_x==1 && clustersize_x>12) {printf("clustersize_x > 12, SKIPPING\n"); continue;} // NEED TO FIX CLUSTERSIZE COMPUTATION
             if(n_double_x==2 && clustersize_x>11) {printf("clustersize_x > 11, SKIPPING\n"); continue;}
             if(n_double_y==1 && clustersize_y>20) {printf("clustersize_y = %i > 20, SKIPPING\n", clustersize_y);continue;}
-            if(n_double_y==2 && clustersize_x>19) {printf("clustersize_y = %i > 19, SKIPPING\n", clustersize_y);continue;}
+            if(n_double_y==2 && clustersize_y>19) {printf("clustersize_y = %i > 19, SKIPPING\n", clustersize_y);continue;}
             //first deal with double width pixels in x
             int k=0,m=0;
             for(int i=0;i<TXSIZE;i++){
