@@ -1,0 +1,5 @@
+ExtractCPEInfo/python/condor/logs
+ExtractCPEInfo/python/condor/*.root
+ExtractCPEInfo/python/condor/__pycache__
+ExtractCPEInfo/python/__pycache__/
+ExtractCPEInfo/python/test.root

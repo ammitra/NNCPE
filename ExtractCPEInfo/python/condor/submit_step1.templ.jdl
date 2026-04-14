@@ -1,0 +1,15 @@
+#!/usr/bin/env condor_submit
+
+executable              = $dir/${prefix}.sh
+should_transfer_files   = YES
+transfer_output_files   = TTbar_14TeV_TuneCP5_cfi_GEN_SIM_${i}.root
+when_to_transfer_output = ON_EXIT_OR_EVICT
+request_memory          = 3000
+use_x509userproxy       = true
+x509userproxy           = /uscms/home/${user}/x509up_u56971
+
+output                  = $dir/logs/${prefix}.out
+error                   = $dir/logs/${prefix}.err
+log                     = $dir/logs/${prefix}.log
+
+Queue 1
